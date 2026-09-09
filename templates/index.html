@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>The Daily Wire Desk</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="masthead">
+  <div class="date">{{ today }}</div>
+  <h1>THE DAILY WIRE DESK</h1>
+  <div class="tagline">All the news, sorted your way</div>
+</div>
+
+<div class="ticker"><span id="tickerText">Loading wire feed…</span></div>
+
+<div class="hero-section">
+  <div class="hero-label">Top Stories — India &amp; the World</div>
+  <div class="hero-grid" id="heroGrid">
+    {% for s in featured %}
+    <article class="hero-story" data-id="{{ s.id }}">
+      <div class="meta"><span class="cat {{ s.category|lower }}">{{ s.category }}</span></div>
+      <h2>{{ s.title }}</h2>
+      <p>{{ s.summary }}</p>
+      <div class="src">Source: {{ s.source }}</div>
+    </article>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="controls" id="controls">
+  {% for cat in categories %}
+    <button class="chip {% if cat == 'All' %}active{% endif %}" data-cat="{{ cat }}">{{ cat }}</button>
+  {% endfor %}
+  <button class="chip top10" id="top10Btn">★ Top 10 Today</button>
+</div>
+
+<div class="feed" id="feed"></div>
+
+<div class="modal-backdrop" id="modalBackdrop">
+  <div class="modal" id="modal">
+    <button class="modal-close" id="modalClose">&times;</button>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>
