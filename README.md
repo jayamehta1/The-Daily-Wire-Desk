@@ -2,7 +2,7 @@
 
 # 📰 The Daily Wire Desk
 
-**A print-style daily news web app — clickable stories, and a Top 10 Today view.**
+**A print-style daily news web app — colorful categories, clickable stories, and a Top 10 Today view.**
 
 ![Python](https://img.shields.io/badge/Python-3.10+-3776AB?logo=python&logoColor=white)
 ![Flask](https://img.shields.io/badge/Flask-3.0-000000?logo=flask&logoColor=white)
@@ -18,11 +18,12 @@
 ## ✨ Features
 
 - 🗞️ **Print-newspaper design** — masthead, scrolling ticker, serif type
+- 📡 **Live news** — pulls real headlines from public RSS feeds (no API key needed), auto-refreshes hourly
 - 🇮🇳 **Hero section** — top India & world stories featured up front
 - 🖱️ **Clickable stories** — click any card to open the full story in a modal, with a link to the original source
 - 🏷️ **Category filters** — India, World, Tech, Politics, Business
 - ⭐ **Top 10 Today** — ranks and numbers the day's biggest stories
-- 🔌 **Simple data layer** — all news lives in one editable `stories.json`, no database needed
+- 🔌 **Simple data layer** — all news lives in one auto-generated `stories.json`
 
 ---
 
@@ -89,8 +90,9 @@ Then open **http://localhost:5000** 🎉
 
 ```
 daily-wire-desk/
-├── app.py                  # Flask routes + API
-├── stories.json            # 📝 all news content lives here
+├── app.py                  # Flask routes + API + starts live-news scheduler
+├── fetch_news.py           # 📡 pulls live headlines from RSS feeds
+├── stories.json            # auto-generated news data (fallback if a fetch fails)
 ├── templates/
 │   └── index.html          # page template
 ├── static/
@@ -104,29 +106,37 @@ daily-wire-desk/
 
 ---
 
-## ✍️ Customize the News
+## 📡 Live News
 
-All content lives in `stories.json` — no code changes needed to update headlines:
+News comes from public RSS feeds — no API key or signup required. On startup, `app.py` calls `fetch_news.py`, which pulls the latest headlines and rewrites `stories.json`. It then refreshes automatically every hour while the app is running.
 
-```json
-{
-  "id": 1,
-  "category": "India",
-  "title": "Your headline here",
-  "summary": "Two or three sentence summary.",
-  "source": "Source Name",
-  "url": "https://source-website.com/article",
-  "rank": 1,
-  "featured": true
-}
+**Feeds used** (edit the `FEEDS` dict in `fetch_news.py` to add/remove sources):
+
+| Category | Sources |
+|---|---|
+| India | Times of India, NDTV |
+| World | BBC World, Reuters World |
+| Tech | TechCrunch |
+| Business | BBC Business |
+| Politics | BBC Politics |
+
+**Manual refresh** without restarting the server:
+```bash
+curl -X POST http://localhost:5000/api/refresh
 ```
 
-| Field | What it does |
-|---|---|
-| `category` | Controls filter chip + color tag (`India`, `World`, `Tech`, `Politics`, `Business`) |
-| `rank` | Lower number = higher priority in "Top 10 Today" and the ticker |
-| `featured` | `true` puts it in the hero row up top |
-| `url` | Where "Read full story →" links to |
+**Manual refresh** from the command line, no server needed:
+```bash
+python fetch_news.py
+```
+
+If a feed is unreachable (no internet, feed down), the app keeps whatever was last saved in `stories.json` instead of breaking.
+
+---
+
+## ✍️ Customize the News
+
+All content is fetched live via RSS (see [Live News](#-live-news) above). To manually override or add a story, edit `stories.json` directly — it'll get overwritten on the next auto-refresh unless you also add it as a feed source in `fetch_news.py`.
 
 ---
 
